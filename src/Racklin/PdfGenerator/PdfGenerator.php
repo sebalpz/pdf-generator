@@ -29,13 +29,16 @@ class PdfGenerator
      */
     public function generate($template, $data, $name = '', $desc = 'I') {
 
-        if(is_file($template)) {
+        if(is_string($template) && is_file($template)) {
             $templateDir = dirname($template);
 
             $settings = json_decode(file_get_contents($template), true);
         }
-        else {
+        else if(is_object($template)) {
             $settings = $template;
+        }
+        else {
+            $settings = json_decode($template);
         }
         $tcpdf = $this->initTCPDF($settings);
 
