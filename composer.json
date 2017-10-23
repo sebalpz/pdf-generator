@@ -1,5 +1,5 @@
 {
-    "name": "racklin/pdf-generator",
+    "name": "sebalpz/pdf-generator",
     "description": "simple pdf generator for laravel 5",
     "keywords" : ["laravel", "pdf", "tcpdf"],
     "license" : "MIT",
