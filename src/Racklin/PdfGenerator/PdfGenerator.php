@@ -29,9 +29,14 @@ class PdfGenerator
      */
     public function generate($template, $data, $name = '', $desc = 'I') {
 
-        $templateDir = dirname($template);
+        if(is_file($template) {
+            $templateDir = dirname($template);
 
-        $settings = json_decode(file_get_contents($template), true);
+            $settings = json_decode(file_get_contents($template), true);
+        }
+        else {
+            $settings = $template;
+        }
         $tcpdf = $this->initTCPDF($settings);
 
         foreach ($settings['pages'] as $page) {
