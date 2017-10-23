@@ -34,7 +34,7 @@ class PdfGenerator
 
             $settings = json_decode(file_get_contents($template), true);
         }
-        else if(is_object($template)) {
+        else if(is_object($template) || is_array($template)) {
             $settings = $template;
         }
         else {
