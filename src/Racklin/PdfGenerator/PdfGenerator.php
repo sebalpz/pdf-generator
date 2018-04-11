@@ -14,6 +14,7 @@ class PdfGenerator
     protected $stEngine = null;
     protected $defautFont;
     protected $defaultFontSize;
+    protected $defaultFontStyle = '';
 
     public function __construct()
     {
@@ -87,21 +88,73 @@ class PdfGenerator
                     //shortcut
                     $els = explode("|",$d);
                     $d = [];
-                    if(sizeof($els) == 3) {
-                        $d['x'] = doubleval($els[0]);
-                        $d['y'] = doubleval($els[1]);
-                        $d['text'] = $els[2];
-                    }
-                    else {
+                    $d['font'] = $this->defaultFont;
+                    $d['font-size'] = $this->defaultFontSize;
+                    $d['font-style'] = $this->defaultFontStyle;
+
+                    if(sizeof($els) == 1) {
                         $d['x'] = 0;
                         $d['y'] = 0;
                         $d['text'] = $els[0];
                     }
-                    $d['font'] = $this->defaultFont;
-                    $d['font-size'] = $this->defaultFontSize;
+                    else if($els[0] == 'line') {
+                        $tcpdf->Line($els[1],$els[2],$els[3],$els[4]);
+                    }
+                    else if($els[0] == 'box') {
+                        $tcpdf->SetXY(intval($els[1])+1, intval($els[2])+1);
+                        $tcpdf->SetFontSize(7);
+                        $tcpdf->Cell(3, 3, "" ,1);
+//                        $tcpdf->Image($this->getXMark(), $els[1], $els[2],7);
+                    }
+                    else if($els[0] == 'box_x') {
+                        $tcpdf->SetXY(intval($els[1])+1, intval($els[2])+1);
+                        $tcpdf->SetFontSize(7);
+                        $tcpdf->Cell(3, 3, $tcpdf->Image($this->getXMark(), intval($els[1])-1, intval($els[2])-1,7) ,1);
+                    }
+                    else {
+                        $d['x'] = doubleval($els[0]);
+                        $d['y'] = doubleval($els[1]);
+                        $d['text'] = $els[2];
+                        //els[3] ist Schriftstil
+                        if(isset($els[3]) && strlen($els[3])) {
+                            $d['font-style']=$els[3];
+                            $tcpdf->SetFont($d['font'], $d['font-style']);
+                        }
+                        if(isset($els[4]) && strlen($els[4])) {
+                            $d['font-size']=intval($els[4]);
+                            $tcpdf->SetFont($d['font'], $d['font-style'], $d['font-size']);
+                        }
+                        //els[5] ist maximale Breite
+                        if(isset($els[5]) && $tcpdf->GetStringWidth($els[2], $d['font'], '', $d['font-size']) > $els[5]) {
+                            $rawtext = str_replace(["\r","\n"], ["", "\n "], $els[2]);
+                            $paragraphs = explode("\n", $rawtext);
+                            $lines = [];
+                            foreach ($paragraphs as $paragraph) {
+                                $parts = explode(" ", $paragraph);
+                                $line = "";
+                                $prevpart = "";
+                                foreach ($parts as $part) {
+                                    $tmpline = $line . $part . " ";
+                                    if ($tcpdf->GetStringWidth($tmpline, $d['font'], '', $d['font-size']) > $els[5]) {
+                                        if ($prevpart == "") {
+                                            $lines = [$els[2]];
+                                            break;
+                                        }
+                                        array_push($lines, trim($line));
+                                        $line = $part . " ";
+                                    } else $line = $tmpline;
+                                    $prevpart = $part;
+                                }
+                                $line = trim($line);
+                                if (strlen($line)) array_push($lines,$line);
+                                $d['text'] = implode("\r\n", $lines);
+                            }
+                        }
+
+                    }
                 }
                 if (!empty($d['font']) && !empty($d['font-size'])) {
-                    $tcpdf->SetFont($d['font'], '', $d['font-size'], '', true);
+                    $tcpdf->SetFont($d['font'], $d['font-style'], $d['font-size'], '', true);
                 }
 
                 // text
@@ -137,10 +190,24 @@ class PdfGenerator
         }
 
         $tcpdf->Output($name, $desc);
-
-
     }
 
+    public function getXMark($position=null) {
+        $xmarks=array();
+        $path=storage_path("app/xmarks/");
+        $dh = opendir($path);
+        if ($dh) {
+            while (($file=readdir($dh)) !== false) {
+                if($file==".."||$file[0]==".") continue;
+                if(filetype($path.$file)=="dir") continue;
+                array_push($xmarks,$path.$file);
+            }
+            closedir($dh);
+        }
+        if(!is_null($position) && isset($xmarks[$position])) return $xmarks[$position];
+        $position=rand(0,sizeof($xmarks)-1);
+        return $xmarks[$position];
+    }
 
     protected  function initTCPDF($settings) {
 
