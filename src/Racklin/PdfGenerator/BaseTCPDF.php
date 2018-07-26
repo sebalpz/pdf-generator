@@ -3,7 +3,9 @@
 namespace Racklin\PdfGenerator;
 
 
-class BaseTCPDF extends \TCPDF
+use setasign\Fpdi\TcpdfFpdi;
+
+class BaseTCPDF extends TcpdfFpdi
 {
     protected $headerCallback;
     protected $footerCallback;
