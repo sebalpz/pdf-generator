@@ -46,7 +46,6 @@ class PdfGenerator
             $settings = json_decode($template);
         }
         $tcpdf = $this->initTCPDF($settings);
-
         foreach ($settings['pages'] as $page) {
             $tcpdf->AddPage();
 
@@ -62,7 +61,9 @@ class PdfGenerator
                 if(!is_null($img_file)) {
                     if(mime_content_type($img_file) == 'application/pdf') {
                         $tcpdf->setSourceFile($img_file);
-                        $tcpdf->tplId = $tcpdf->importPage(1);
+                        if(!empty($page['background_page'])) $pagenr = $page['background_page'];
+                        else $pagenr = 1;
+                        $tcpdf->tplId = $tcpdf->importPage($pagenr);
                         $tcpdf->useImportedPage($tcpdf->tplId, 0, 0, 210);
                     }
                     else if(strpos(mime_content_type($img_file),'image') !== false) {
