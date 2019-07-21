@@ -32,7 +32,6 @@ class PdfGenerator
      * @param $desc 'I' , 'D' , 'F', 'FI' , 'FD'
      */
     public function generate($template, $data, $name = '', $desc = 'I') {
-
         $templateDir = "";
         if(is_string($template) && is_file($template)) {
             $templateDir = dirname($template);
@@ -111,6 +110,18 @@ class PdfGenerator
                         $tcpdf->SetXY(intval($els[1])+1, intval($els[2])+1);
                         $tcpdf->SetFontSize(7);
                         $tcpdf->Cell(3, 3, $tcpdf->Image($this->getXMark(), intval($els[1])-1, intval($els[2])-1,7) ,1);
+                    }
+                    else if($els[0] == 'mark_x') {
+                        $tcpdf->SetXY(intval($els[1])+1, intval($els[2])+1);
+                        $tcpdf->SetFontSize(7);
+                        $tcpdf->Cell(3, 3, $tcpdf->Image($this->getXMark(), intval($els[1])-1, intval($els[2])-1,7) ,0);
+                    }
+                    else if($els[0] == 'image') {
+//                        $tcpdf->SetXY(intval($els[1])+1, intval($els[2])+1);
+//                            dd($els, strlen($els[3]) != 0 , is_file($els[3]));
+                        if(strlen($els[3]) != 0 && is_file($els[3])) {
+                            $tcpdf->Image($els[3], $els[1], $els[2], $els[4], $els[5]);
+                        }
                     }
                     else {
                         $d['x'] = doubleval($els[0]);
