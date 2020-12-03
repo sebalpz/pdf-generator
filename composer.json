@@ -14,7 +14,7 @@
         "illuminate/support": "5.*",
         "nicmart/string-template": "~0.1",
         "setasign/fpdi-tcpdf": "^2.0",
-        "tecnickcom/tcpdf": "6.2.*"
+        "tecnickcom/tcpdf": "6.3.*"
     },
     "autoload": {
         "psr-0": {
